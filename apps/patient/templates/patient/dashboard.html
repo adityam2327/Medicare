@@ -1,0 +1,97 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #fffbe6;
+    }
+    .dashboard {
+        text-align: center;
+        padding: 50px;
+        background: linear-gradient(135deg, #ffeb99, #ffcc66);
+        color: #5a3e02;
+        min-height: 100vh;
+    }
+    .dashboard h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+    .feature {
+        background: rgba(255, 255, 204, 0.8);
+        padding: 20px;
+        margin: 20px auto;
+        border-radius: 15px;
+        max-width: 500px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: 0.3s;
+    }
+    .feature:hover {
+        transform: scale(1.05);
+    }
+    .feature h2 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        color: #8c5e10;
+    }
+    .feature p {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        color: #5a3e02;
+    }
+    .button {
+        display: inline-block;
+        padding: 12px 25px;
+        font-size: 1rem;
+        font-weight: bold;
+        color: #fff;
+        background: #ff9900;
+        border-radius: 25px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .button:hover {
+        background: #e68a00;
+        transform: scale(1.1);
+    }
+</style>
+
+<div class="dashboard">
+    <h1>Welcome to Your Personalized Health Dashboard</h1>
+    <p>Stay healthy, stay informed. Your health companion is just a click away!</p>
+    
+    <div class="feature">
+        <h2>Health Calendar</h2>
+        <p>Track your medical appointments and health routines.</p>
+        <a href="{% url 'patient:health_calendar' %}" class="button">View Now</a>
+    </div>
+
+    <div class="feature">
+        <h2>Care Finder</h2>
+        <p>Find the best hospitals and clinics near you effortlessly.</p>
+        <a href="{% url 'patient:care_finder' %}" class="button">Explore Now</a>
+    </div>
+    
+
+
+    <div class="feature">
+        <h2>Community Updates</h2>
+        <p>Stay informed with the latest healthcare news in your area.</p>
+        <a href="{% url 'patient:community_updates' %}" class="button">Read Updates</a>
+    </div>
+
+
+    <div class="feature">
+        <h2>MedInfo</h2>
+        <p>Access medical information and health resources.</p>
+        <a href="{% url 'patient:medinfo' %}" class="button">Learn More</a>
+    </div>
+
+
+   
+</div>
+{% endblock %}

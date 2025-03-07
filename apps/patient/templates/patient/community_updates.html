@@ -1,0 +1,102 @@
+{% extends 'patient/base.html' %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fffbe6;
+        margin: 0;
+        padding: 0;
+        color: #444;
+    }
+    .container {
+        max-width: 900px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #ffcc00;
+    }
+    .filters {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .filters select {
+        padding: 10px;
+        border: 2px solid #ffcc00;
+        border-radius: 5px;
+        background-color: #fffbe6;
+    }
+    .update {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #fffdf2;
+        border: 1px solid #ffd966;
+        border-radius: 10px;
+        align-items: center;
+    }
+    .update img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+        border: 2px solid #ffcc00;
+    }
+    .update-content {
+        flex: 1;
+    }
+    .update-content h2 {
+        margin: 0;
+        color: #ffcc00;
+    }
+    .update-content p {
+        margin: 10px 0;
+        color: #555;
+    }
+    .update-content time {
+        font-size: 0.9em;
+        color: #999;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Community Updates</h1>
+
+    <!-- Filters -->
+    <div class="filters">
+        <form method="get">
+            <select name="category" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for code, name in categories %}
+                    <option value="{{ code }}" {% if request.GET.category == code %}selected{% endif %}>
+                        {{ name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- Updates -->
+    {% for update in updates %}
+    <div class="update">
+        {% if update.image %}
+        <img src="{{ update.image.url }}" alt="{{ update.title }}">
+        {% endif %}
+        <div class="update-content">
+            <h2>{{ update.title }}</h2>
+            <time>Published on: {{ update.created_at|date:"F j, Y" }}</time>
+            <p>{{ update.content|slice:":200" }}{% if update.content|length > 200 %}...{% endif %}</p>
+        </div>
+    </div>
+    {% empty %}
+    <p>No updates available at the moment. Check back soon!</p>
+    {% endfor %}
+</div>
+{% endblock %}

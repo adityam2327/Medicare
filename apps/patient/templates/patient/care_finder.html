@@ -1,0 +1,292 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}Care Finder{% endblock %}
+
+{% block content %}
+    <style>
+      /* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: #fafafa;
+    padding: 2rem;
+}
+
+/* Header styles */
+h2 {
+    color: #333;
+    margin-bottom: 2rem;
+    position: relative;
+    display: inline-block;
+    margin: 0 auto; /* Centers it */
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: #FFD700;
+    animation: underline 0.5s ease forwards;
+}
+
+@keyframes underline {
+    to {
+        width: 100%;
+    }
+}
+
+/* Search section */
+#placeInput {
+    padding: 1rem;
+    width: 300px;
+    border: 2px solid #FFE566;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-right: 1rem;
+}
+
+#placeInput:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+}
+
+button {
+    padding: 1rem 2rem;
+    background-color: #FFD700;
+    border: none;
+    border-radius: 8px;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #FFC800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Hospital list */
+#hospitalList {
+    margin-top: 2rem;
+    list-style: none;
+}
+
+#hospitalList li {
+    background-color: white;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #FFD700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    animation: slideIn 0.5s ease forwards;
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+#hospitalList li:hover {
+    transform: translateX(0) scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Chat container */
+#chatContainer {
+    margin-top: 3rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 600px;
+}
+
+#chatTitle {
+    background-color: #FFD700;
+    color: #333;
+    padding: 1rem;
+    margin: 0;
+}
+
+#chatBox {
+    height: 300px;
+    padding: 1rem;
+    overflow-y: auto;
+    background-color: #fafafa;
+}
+
+#userInput {
+    width: calc(100% - 100px);
+    padding: 1rem;
+    border: none;
+    border-top: 1px solid #eee;
+    font-size: 1rem;
+}
+
+#userInput:focus {
+    outline: none;
+    background-color: #fff9e6;
+}
+
+/* Chat messages */
+.message {
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    border-radius: 8px;
+    max-width: 80%;
+    animation: fadeIn 0.3s ease forwards;
+    opacity: 0;
+}
+
+.user-message {
+    background-color: #FFE566;
+    margin-left: auto;
+    border-bottom-right-radius: 2px;
+}
+
+.hospital-message {
+    background-color: #f0f0f0;
+    margin-right: auto;
+    border-bottom-left-radius: 2px;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #FFE566;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #FFD700;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+
+    #placeInput {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    #chatContainer {
+        margin-top: 2rem;
+    }
+}  /* Modern CSS Reset */
+
+    </style>
+    <script>
+        function findHospitals() {
+            let place = document.getElementById("placeInput").value;
+
+            if (place) {
+                fetch(`/patient/care-finder/find?place=${place}`)
+                .then(response => response.json())
+                .then(data => displayHospitals(data));
+            } else {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    fetch(`/patient/care-finder/find?lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
+                    .then(response => response.json())
+                    .then(data => displayHospitals(data));
+                });
+            }
+        }
+
+        function displayHospitals(data) {
+            let list = document.getElementById("hospitalList");
+            list.innerHTML = "";
+            document.getElementById("chatContainer").style.display = "none";
+
+            data.hospitals.forEach(hospital => {
+                let item = document.createElement("li");
+                item.innerHTML = `<span class="hospital-item" onclick="openChat('${hospital.name}')">${hospital.name}</span> - 📍(${hospital.lat}, ${hospital.lon})`;
+                list.appendChild(item);
+            });
+        }
+
+        function openChat(hospitalName) {
+            document.getElementById("chatContainer").style.display = "block";
+            document.getElementById("chatTitle").innerText = `Chat with ${hospitalName}`;
+            document.getElementById("chatBox").innerHTML = `<p><b>Bot:</b> Welcome! How can I help you with ${hospitalName}?</p>`;
+            document.getElementById("hospitalName").value = hospitalName;
+        }
+
+        function sendMessage() {
+            let userInput = document.getElementById("userInput").value;
+            let hospitalName = document.getElementById("hospitalName").value;
+            if (!userInput) return;
+
+            let chatBox = document.getElementById("chatBox");
+            chatBox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
+
+            fetch(`/patient/care-finder/chatbot-response/?message=${userInput}&hospital_name=${hospitalName}`)
+            .then(response => response.json())
+            .then(data => {
+                chatBox.innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
+            });
+
+            document.getElementById("userInput").value = "";
+        }
+    </script>
+
+<body>
+    <h2>Find Nearby Hospitals</h2>
+    <input type="text" id="placeInput" placeholder="Enter place name">
+    <button onclick="findHospitals()">Search</button>
+    
+    <ul id="hospitalList"></ul>
+
+    <div id="chatContainer">
+        <h3 id="chatTitle"></h3>
+        <div id="chatBox"></div>
+        <input type="hidden" id="hospitalName">
+        <input type="text" id="userInput" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</body>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,301 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}Health Calendar{% endblock %}
+
+{% block content %}
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #fffde7; /* Light yellow background */
+}
+
+.header {
+    background: #fff59d; /* Soft yellow header background */
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    color: #f57f17; /* Deep yellow for heading */
+}
+
+.header button {
+    background: #f57f17; /* Vibrant yellow-orange button */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.header button:hover {
+    background: #f9a825; /* Lighter yellow-orange for hover */
+}
+
+.appointments {
+    padding: 20px;
+}
+
+h2 {
+    color: #f57f17; /* Matching deep yellow for subheadings */
+}
+
+.appointment-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-card.upcoming {
+    border-left: 5px solid #fbc02d; /* Golden yellow accent for upcoming appointments */
+}
+
+.appointment-card.past {
+    opacity: 0.6;
+}
+
+.actions {
+    margin-top: 10px;
+}
+
+button.reschedule {
+    background: #fdd835; /* Bright yellow button for rescheduling */
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button.cancel {
+    background: #f4511e; /* Orange-red button for cancellation */
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button.reschedule:hover {
+    background: #fbc02d; /* Slightly darker yellow for hover effect */
+}
+
+button.cancel:hover {
+    background: #d84315; /* Darker red-orange for hover */
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    margin: 15% auto;
+    width: 40%;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #f57f17; /* Yellow close button */
+}
+
+
+</style>
+
+    <div class="header">
+        <h1>📅 <strong>Health Calendar</strong></h1>
+        <p>Your next appointment is just a click away—let’s make your health a priority!</p>
+        <button id="openAppointmentModal">📌 Book your Appointment</button>
+    </div>
+
+    <section class="appointments">
+        <h2>Past Appointments</h2>
+        <div class="past-appointments">
+            <p class="no-appointments">No Past Appointments. Schedule Your Appointment Today!</p>
+        </div>
+
+        <h2>Upcoming Appointments</h2>
+        <div class="upcoming-appointments" id="upcomingAppointments">
+            <p class="no-appointments">No Upcoming Appointments</p>
+        </div>
+    </section>
+
+    <!-- Book Appointment Modal -->
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('appointmentModal')">&times;</span>
+            <h2>Book an Appointment</h2>
+            <form id="appointmentForm">
+                <label for="doctor">Doctor:</label>
+                <input type="text" id="doctor" required>
+
+                <label for="date">Date:</label>
+                <input type="date" id="date" required>
+
+                <label for="time">Time:</label>
+                <input type="time" id="time" required>
+
+                <label for="type">Type:</label>
+                <input type="text" id="type" required>
+
+                <button type="submit">Book Now</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reschedule Appointment Modal -->
+    <div id="rescheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('rescheduleModal')">&times;</span>
+            <h2>Reschedule Appointment</h2>
+            <form id="rescheduleForm">
+                <input type="hidden" id="rescheduleIndex">
+                <label for="newDate">New Date:</label>
+                <input type="date" id="newDate" required>
+                <label for="newTime">New Time:</label>
+                <input type="time" id="newTime" required>
+                <button type="submit">Confirm</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const appointmentModal = document.getElementById("appointmentModal");
+            const rescheduleModal = document.getElementById("rescheduleModal");
+    
+            // Open Book Appointment Modal
+            document.getElementById("openAppointmentModal").addEventListener("click", function () {
+                appointmentModal.style.display = "block";
+            });
+    
+            // Close Modals when clicking on the 'x' button
+            document.querySelectorAll(".close").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    btn.closest(".modal").style.display = "none";
+                });
+            });
+    
+            // Close Modal when clicking outside
+            window.addEventListener("click", function (event) {
+                if (event.target === appointmentModal) {
+                    appointmentModal.style.display = "none";
+                }
+                if (event.target === rescheduleModal) {
+                    rescheduleModal.style.display = "none";
+                }
+            });
+    
+            // Book Appointment
+            document.getElementById("appointmentForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+                const doctor = document.getElementById("doctor").value;
+                const date = document.getElementById("date").value;
+                const time = document.getElementById("time").value;
+                const type = document.getElementById("type").value;
+    
+                if (doctor && date && time && type) {
+                    addAppointment(doctor, date, time, type);
+                    closeModal('appointmentModal');
+                    document.getElementById("appointmentForm").reset();
+                }
+            });
+    
+            // Reschedule Appointment
+            document.getElementById("rescheduleForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+                const newDate = document.getElementById("newDate").value;
+                const newTime = document.getElementById("newTime").value;
+                const index = document.getElementById("rescheduleIndex").value;
+    
+                if (newDate && newTime && index !== "") {
+                    rescheduleAppointment(parseInt(index), newDate, newTime);
+                    closeModal('rescheduleModal');
+                    document.getElementById("rescheduleForm").reset();
+                }
+            });
+        });
+    
+        function addAppointment(doctor, date, time, type) {
+            const upcomingAppointments = document.getElementById("upcomingAppointments");
+    
+            // Remove "No Upcoming Appointments" text if it exists
+            const noAppointmentsText = document.querySelector(".no-appointments");
+            if (noAppointmentsText) {
+                noAppointmentsText.remove();
+            }
+    
+            const appointmentCard = document.createElement("div");
+            appointmentCard.classList.add("appointment-card", "upcoming");
+    
+            appointmentCard.innerHTML = `
+                <p>📅 <strong>Date:</strong> <span class="appointment-date">${date}</span></p>
+                <p>👨‍⚕️ <strong>Doctor:</strong> ${doctor}</p>
+                <p>⏰ <strong>Time:</strong> <span class="appointment-time">${time}</span></p>
+                <p>✏️ <strong>Type:</strong> ${type}</p>
+                <div class="actions">
+                    <button class="reschedule" onclick="openRescheduleModal(this)">Reschedule</button>
+                    <button class="cancel" onclick="cancelAppointment(this)">Cancel</button>
+                </div>
+            `;
+    
+            upcomingAppointments.appendChild(appointmentCard);
+        }
+    
+        function openRescheduleModal(button) {
+            const appointmentCard = button.closest(".appointment-card");
+            const index = [...document.querySelectorAll('.appointment-card')].indexOf(appointmentCard);
+    
+            // Store the index for rescheduling
+            document.getElementById("rescheduleIndex").value = index;
+            document.getElementById("rescheduleModal").style.display = "block";
+        }
+    
+        function rescheduleAppointment(index, newDate, newTime) {
+            const appointmentCards = document.querySelectorAll('.appointment-card');
+            const appointmentCard = appointmentCards[index];
+    
+            if (appointmentCard) {
+                appointmentCard.querySelector('.appointment-date').textContent = newDate;
+                appointmentCard.querySelector('.appointment-time').textContent = newTime;
+            }
+        }
+    
+        function cancelAppointment(button) {
+            if (confirm("Are you sure you want to cancel this appointment?")) {
+                button.closest(".appointment-card").remove();
+    
+                // If no more appointments, show the "No Upcoming Appointments" message
+                if (!document.querySelector(".appointment-card")) {
+                    document.getElementById("upcomingAppointments").innerHTML = '<p class="no-appointments">No Upcoming Appointments</p>';
+                }
+            }
+        }
+    
+        function closeModal(id) {
+            document.getElementById(id).style.display = "none";
+        }
+    </script>
+    
+
+
+{% endblock %}

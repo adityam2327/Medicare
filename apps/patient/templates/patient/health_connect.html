@@ -1,0 +1,101 @@
+{% extends 'patient/base.html' %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fffbe6;
+        margin: 0;
+        padding: 0;
+        color: #444;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #ffcc00;
+    }
+    .filters {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .filters select {
+        padding: 10px;
+        border: 2px solid #ffcc00;
+        border-radius: 5px;
+        background-color: #fffbe6;
+    }
+    .professional {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #fffdf2;
+        border: 1px solid #ffd966;
+        border-radius: 10px;
+        align-items: center;
+    }
+    .professional img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #ffcc00;
+    }
+    .professional-content {
+        flex: 1;
+    }
+    .professional-content h2 {
+        margin: 0;
+        color: #ffcc00;
+    }
+    .professional-content p {
+        margin: 5px 0;
+        color: #555;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Health Connect</h1>
+
+    <!-- Filters -->
+    <div class="filters">
+        <form method="get">
+            <select name="specialization" onchange="this.form.submit()">
+                <option value="">All Specializations</option>
+                {% for code, name in specializations %}
+                    <option value="{{ code }}" {% if request.GET.specialization == code %}selected{% endif %}>
+                        {{ name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- Healthcare Professionals -->
+    {% for professional in professionals %}
+    <div class="professional">
+        {% if professional.profile_image %}
+        <img src="{{ professional.profile_image.url }}" alt="{{ professional.name }}">
+        {% else %}
+        <img src="https://via.placeholder.com/100" alt="Placeholder">
+        {% endif %}
+        <div class="professional-content">
+            <h2>{{ professional.name }}</h2>
+            <p><strong>Specialization:</strong> {{ professional.specialization }}</p>
+            <p><strong>Experience:</strong> {{ professional.experience }} years</p>
+            <p><strong>Contact:</strong> {{ professional.contact_info }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <p>No professionals available at the moment. Check back soon!</p>
+    {% endfor %}
+</div>
+{% endblock %}

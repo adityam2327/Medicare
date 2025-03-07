@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Patient Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'patient/css/style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+</head>
+
+<body>
+
+    <style>
+        .chatbot-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #ff9900;
+            /* Yellow Theme */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .chatbot-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .chatbot-bubble {
+            font-size: 28px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+
+    <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+
+    <div class="sidebar" id="slidebar">
+
+        <h2>MediCare</h2>
+
+        <ul>
+
+            <li><a href="{% url 'patient:dashboard' %}">🏠 Home</a></li>
+            <li><a href="{% url 'patient:health_calendar' %}">📅 Health Calendar</a></li>
+            <li><a href="{% url 'patient:care_finder' %}">🗺️ Care Finder</a></li>
+
+            <li><a href="{% url 'patient:community_updates' %}">📰 Community Updates</a></li>
+
+            <li><a href="{% url 'patient:medinfo' %}">📖 MedInfo</a></li>
+
+
+            <li><a href="{% url 'patient:profile' %}">👤 Profile</a></li>
+            <li><a href="{% url 'patient:logout' %}">🚪 Logout</a></li>
+
+
+
+
+        </ul>
+    </div>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{% static 'patient/js/slidebar.js' %}"></script>
+</body>
+<a href="{% url 'chatbot' %}" class="chatbot-icon">
+    <div class="chatbot-bubble">💬</div>
+</a>
+
+</html>

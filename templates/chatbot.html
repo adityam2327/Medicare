@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health AI Chatbot</title>
+    <style>
+/* Base Variables and Reset */
+:root {
+    --primary: #FFD700;
+    --secondary: #8B8000;
+    --accent: #FFA500;
+    --bg-gradient: linear-gradient(135deg, #FFF9C4 0%, #FFE082 100%);
+    --glass-bg: rgba(255, 248, 225, 0.95);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --container-padding: 1rem;
+    --message-max-width: 85%;
+    --font-size-base: 14px;
+    --chat-height: 70vh;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+html {
+    font-size: var(--font-size-base);
+}
+
+body {
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--container-padding);
+}
+
+/* Container Styles */
+.chat-container {
+    width: 95%;
+    margin: 0 auto;
+    max-height: 100vh;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    animation: containerEntry 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Header Styles */
+h1 {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding: 1rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Chat Box Styles */
+.chat-box {
+    height: var(--chat-height);
+    padding: 0.75rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Message Styles */
+.message {
+    max-width: var(--message-max-width);
+    padding: 0.75rem;
+    border-radius: 1.25rem;
+    position: relative;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    animation: messageEntry 0.4s ease-out forwards;
+}
+
+.user-message {
+    background: linear-gradient(135deg, var(--primary), #FFC400);
+    color: #2c2c2c;
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+
+.bot-message {
+    background: rgba(255, 253, 231, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+/* Responsive Components */
+.message-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.user-icon {
+    background: var(--primary);
+    color: white;
+}
+
+.bot-icon {
+    background: var(--secondary);
+    color: white;
+}
+
+.timestamp {
+    font-size: 0.75rem;
+    color: rgba(91, 71, 0, 0.4);
+    margin-top: 0.5rem;
+}
+
+/* Input Container */
+.input-container {
+    padding: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+#user-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+button {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Tablet Breakpoint */
+@media screen and (min-width: 768px) {
+    :root {
+        --container-padding: 1.5rem;
+        --message-max-width: 75%;
+        --font-size-base: 16px;
+    }
+
+    .chat-container {
+        width: 90%;
+        max-width: 700px;
+    }
+
+    .message {
+        padding: 1rem;
+    }
+
+    .input-container {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .message-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+    }
+}
+
+/* Desktop Breakpoint */
+@media screen and (min-width: 1024px) {
+    :root {
+        --container-padding: 2rem;
+        --message-max-width: 70%;
+        --chat-height: 65vh;
+    }
+
+    .chat-container {
+        width: 85%;
+        max-width: 800px;
+    }
+
+    h1 {
+        font-size: 2rem;
+        padding: 1.5rem;
+    }
+
+    .chat-box {
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+}
+
+/* Large Desktop */
+@media screen and (min-width: 1440px) {
+    .chat-container {
+        max-width: 1000px;
+    }
+
+    :root {
+        --font-size-base: 18px;
+        --chat-height: 60vh;
+    }
+}
+/* Animations */
+@keyframes containerEntry {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes messageEntry {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Special Cases */
+@media (max-height: 500px) and (orientation: landscape) {
+    :root {
+        --chat-height: 50vh;
+        --container-padding: 0.75rem;
+    }
+
+    .chat-container {
+        height: 100vh;
+    }
+
+    h1 {
+        font-size: 1.25rem;
+        padding: 0.75rem;
+    }
+
+    .input-container {
+        padding: 0.5rem;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .chat-container,
+    .message {
+        animation: none;
+        transform: none;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) {
+    button:hover {
+        transform: none;
+    }
+
+    #user-input,
+    button {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), 
+       (min-resolution: 192dpi) {
+    .chat-container {
+        backdrop-filter: blur(15px);
+    }
+}
+
+/* Utilities */
+.message,
+#user-input,
+button {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+#user-input:focus {
+    outline: none;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+    background: white;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.error-message {
+    color: #c57600;
+    padding: 1rem;
+    text-align: center;
+    font-weight: 500;
+    animation: errorPulse 1.5s ease infinite;
+}
+
+@keyframes errorPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Health AI Assistant</h1>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Ask your health question...">
+            <button onclick="sendMessage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                <span>Send</span>
+            </button>
+        </div>
+        <div id="error-message" class="error-message"></div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            addMessage("I am a Health AI assistant. How can I help you today?", false);
+        };
+
+        function addMessage(message, isUser) {
+            const chatBox = document.getElementById('chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.textContent = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            setTimeout(() => {
+                errorDiv.textContent = '';
+            }, 3000);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            addMessage(message, true);
+            input.value = '';
+
+            try {
+                const response = await fetch('/chat/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (!response.ok) {
+                    showError(`Error: ${response.statusText}`);
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.response) {
+                    addMessage(data.response, false);
+                } else {
+                    showError('Error: Empty response from server');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error: Unable to send message');
+            }
+        }
+
+        function getCsrfToken() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') return value;
+            }
+            return '';
+        }
+
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
